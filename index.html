@@ -60,14 +60,14 @@
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
 
-    <!-- Left Sidebar: Paper Intro & Mode Controls -->
+    <!-- Left Sidebar: Controls & Guide -->
     <aside class="w-full md:w-1/3 lg:w-2/5 p-6 border-r border-[#2a2a2a] bg-[#0b0b0b] overflow-y-auto md:h-screen sticky top-0 flex flex-col justify-between">
         <div>
             <header class="mb-6">
                 <div class="flex items-center justify-between mb-3">
                     <span id="app-badge" class="px-2.5 py-0.5 text-[10px] font-mono rounded bg-[#4ade80]/10 text-[#4ade80] border border-[#4ade80]/30">LETTER MODE ACTIVE</span>
                     
-                    <!-- 3-Way Mode Selector (Letter, String, Phrase) -->
+                    <!-- 3-Way Mode Selector -->
                     <div class="flex items-center space-x-1 bg-[#1a1a1a] p-1 rounded-lg border border-[#333] font-mono text-[11px]">
                         <button id="mode-btn-letter" class="px-2.5 py-1 rounded text-[#4ade80] bg-[#262626] font-semibold transition cursor-pointer">🔤 Letter</button>
                         <button id="mode-btn-string" class="px-2.5 py-1 rounded text-gray-400 hover:text-white transition cursor-pointer">🧬 String</button>
@@ -79,13 +79,13 @@
             </header>
 
             <div id="essay-body" class="essay-content text-sm text-gray-300 space-y-4">
-                <!-- Text dynamically injected based on active edit mode -->
+                <!-- Dynamically updated -->
             </div>
 
             <div class="mt-6 pt-6 border-t border-[#2a2a2a]">
                 <h3 id="mech-header" class="text-xs font-mono text-gray-400 uppercase tracking-wider mb-3">Biological Rules Guide</h3>
                 <ul id="mech-list" class="space-y-2 text-xs font-mono text-gray-400">
-                    <!-- Rule guides populated dynamically -->
+                    <!-- Dynamically updated -->
                 </ul>
             </div>
         </div>
@@ -99,7 +99,7 @@
     <main class="w-full md:w-2/3 lg:w-3/5 p-4 md:p-8 flex flex-col min-h-screen overflow-y-auto bg-[#0d0d0d]">
         <div class="max-w-4xl mx-auto w-full flex-grow flex flex-col space-y-6">
             
-            <!-- INVERSE DESIGN ENGINE PANEL -->
+            <!-- AUTO-SOLVER PANEL -->
             <div class="glass-panel p-6 border-2 border-[#4ade80]/40 space-y-4 bg-gradient-to-r from-[#111f16] to-[#151515]">
                 <div class="flex items-center justify-between border-b border-[#2a2a2a] pb-3">
                     <h3 id="panel-inverse-title" class="text-white font-semibold uppercase tracking-wider text-xs font-mono flex items-center">
@@ -109,7 +109,7 @@
                 </div>
 
                 <p id="inverse-desc" class="text-xs text-gray-400 font-mono leading-relaxed">
-                    Pick what features you want your creature to have below! The smart solver will test different growth recipes to find the shortest code that grows your dream creature.[cite: 1]
+                    Select target features below! The solver will optimize growth rules to generate your desired creature configuration.[cite: 1]
                 </p>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono pt-1">
@@ -125,7 +125,7 @@
                     </div>
 
                     <div>
-                        <label id="lbl-target-hydro" class="block text-gray-400 mb-1">Skin Type (Water-Lover / Water-Hater)</label>
+                        <label id="lbl-target-hydro" class="block text-gray-400 mb-1">Skin Type (Water Compatibility)</label>
                         <select id="target-hydro-select" class="w-full input-pill px-3 py-1.5 rounded text-xs bg-[#1a1a1a]">
                             <option value="2.5"> Hydrophobic (+2.5 Score)</option>
                             <option value="0.0" selected> Balanced (0.0 Score)</option>
@@ -155,7 +155,7 @@
                 </div>
             </div>
 
-            <!-- FORWARD SANDBOX CONTROLS PANEL -->
+            <!-- WORKSPACE PLAYGROUND -->
             <div class="glass-panel p-6 border border-[#2a2a2a] space-y-4">
                 <div class="flex items-center justify-between border-b border-[#2a2a2a] pb-3">
                     <h3 id="panel-controls-title" class="text-white font-semibold uppercase tracking-wider text-xs font-mono flex items-center">
@@ -164,13 +164,13 @@
                     <span id="badge-controls" class="px-2 py-0.5 text-[10px] font-mono rounded bg-blue-500/10 text-blue-400 border border-blue-500/30">GROWTH CODE</span>
                 </div>
 
-                <!-- Mode Banner Indicator -->
+                <!-- Mode Indicator -->
                 <div id="mode-banner-info" class="text-[11px] font-mono text-[#4ade80] bg-[#4ade80]/10 border border-[#4ade80]/20 p-2 rounded">
-                    <!-- Dynamic mode guidance -->
+                    <!-- Dynamic mode text -->
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Axiom Controls -->
+                    <!-- Axiom Input -->
                     <div id="axiom-container" class="space-y-2 transition-opacity">
                         <div class="flex items-center justify-between">
                             <label id="lbl-axiom-input" class="text-xs font-mono text-gray-300">Starting Seed Code (Axiom String)</label>
@@ -181,49 +181,49 @@
                         </div>
                         <input id="axiom-input" type="text" value="ATG TGC AAG" class="w-full input-pill px-3 py-2 rounded text-xs font-mono uppercase tracking-widest read-only:bg-[#151515] read-only:text-gray-500 read-only:border-gray-800 read-only:cursor-not-allowed">
                         
-                        <!-- Single Letter Quick Actions -->
+                        <!-- Letter Mode Fast Controls -->
                         <div id="single-letter-controls" class="space-y-1.5 pt-1">
-                            <span class="text-[10px] font-mono text-gray-400 block">⚡ Single Letter Swaps:</span>
+                            <span class="text-[10px] font-mono text-gray-400 block">⚡ Quick Single Letter Swaps:</span>
                             <div class="flex flex-wrap gap-1 text-[11px] font-mono">
                                 <button id="mutate-letter-1" class="px-2 py-1 bg-[#222] hover:bg-[#333] border border-[#444] rounded text-emerald-400">Swap A ↔ G</button>
                                 <button id="mutate-letter-2" class="px-2 py-1 bg-[#222] hover:bg-[#333] border border-[#444] rounded text-blue-400">Swap C ↔ T</button>
-                                <button id="mutate-letter-3" class="px-2 py-1 bg-[#222] hover:bg-[#333] border border-[#444] rounded text-purple-400">Random Letter Swap</button>
+                                <button id="mutate-letter-3" class="px-2 py-1 bg-[#222] hover:bg-[#333] border border-[#444] rounded text-purple-400">Random Single Swap</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Rule Controls -->
+                    <!-- Rule Input -->
                     <div id="rules-container" class="space-y-2 transition-opacity flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between">
                                 <label id="lbl-rules-input" class="text-xs font-mono text-gray-300">Growth Swap Rules</label>
                                 <div class="flex space-x-1">
-                                    <button id="rand-rules-btn" class="px-2 py-0.5 bg-[#222] hover:bg-[#333] border border-[#333] text-[10px] font-mono rounded text-gray-300 transition disabled:opacity-40 disabled:cursor-not-allowed">🎲 Random Single Rule</button>
-                                    <button id="smart-rules-btn" class="px-2 py-0.5 bg-[#222] hover:bg-[#333] border border-[#333] text-[10px] font-mono rounded text-[#4ade80] transition disabled:opacity-40 disabled:cursor-not-allowed">⚡ Adapt Seed</button>
+                                    <button id="rand-rules-btn" class="px-2 py-0.5 bg-[#222] hover:bg-[#333] border border-[#333] text-[10px] font-mono rounded text-gray-300 transition disabled:opacity-40 disabled:cursor-not-allowed">🎲 Random Rule</button>
+                                    <button id="smart-rules-btn" class="px-2 py-0.5 bg-[#222] hover:bg-[#333] border border-[#333] text-[10px] font-mono rounded text-[#4ade80] transition disabled:opacity-40 disabled:cursor-not-allowed">⚡ Reset Rule</button>
                                 </div>
                             </div>
                             <input id="rules-input" type="text" value="A->G" class="w-full input-pill px-3 py-2 rounded text-xs font-mono read-only:bg-[#151515] read-only:text-gray-500 read-only:border-gray-800 read-only:cursor-not-allowed">
                             
-                            <!-- Single Phrase Quick Actions -->
+                            <!-- Phrase Mode Fast Controls -->
                             <div id="single-phrase-controls" class="space-y-1.5 pt-1">
-                                <span class="text-[10px] font-mono text-gray-400 block">⚡ Quick Mutate Single Phrase Rule:</span>
+                                <span class="text-[10px] font-mono text-gray-400 block">⚡ Quick Phrase Rule Mutators:</span>
                                 <div class="flex flex-wrap gap-1 text-[11px] font-mono">
                                     <button id="mutate-phrase-1" class="px-2 py-1 bg-[#222] hover:bg-[#333] border border-[#444] rounded text-emerald-400">A->AT</button>
                                     <button id="mutate-phrase-2" class="px-2 py-1 bg-[#222] hover:bg-[#333] border border-[#444] rounded text-blue-400">C->TGC</button>
-                                    <button id="mutate-phrase-3" class="px-2 py-1 bg-[#222] hover:bg-[#333] border border-[#444] rounded text-purple-400">Mutate 1 Phrase</button>
+                                    <button id="mutate-phrase-3" class="px-2 py-1 bg-[#222] hover:bg-[#333] border border-[#444] rounded text-purple-400">Random Phrase Swap</button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Rule Validation Note at the Bottom of the Box -->
+                        <!-- Rule Validation Note -->
                         <div id="rules-validation-note" class="hidden text-[11px] font-mono text-red-400 bg-red-950/40 border border-red-500/30 p-2 rounded mt-2 flex items-center space-x-1">
                             <span>⚠️</span>
-                            <span id="rules-validation-text">Warning: Invalid rule structure!</span>
+                            <span id="rules-validation-text">Validation warning message</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Generation Slider -->
+                <!-- Growth Iteration Slider -->
                 <div class="pt-2">
                     <div class="flex justify-between items-center mb-1">
                         <label id="lbl-iter-slider" class="text-xs font-mono text-gray-300">How Many Growth Turns?</label>
@@ -240,7 +240,7 @@
                 </div>
             </div>
 
-            <!-- 2D Canvas & Expressed Phenotype Profile -->
+            <!-- VISUAL CREATURE CANVAS & PHENOTYPE DISPLAY -->
             <div id="phenotype-text-panel" class="glass-panel p-6 border border-[#2a2a2a] space-y-4">
                 <div class="flex items-center justify-between border-b border-[#2a2a2a] pb-3">
                     <h3 id="panel-expressed-title" class="text-white font-semibold uppercase tracking-wider text-xs font-mono flex items-center">
@@ -249,7 +249,6 @@
                     <span id="text-status-badge" class="px-2.5 py-1 text-xs font-mono rounded bg-[#1c1c1c] text-[#4ade80] border border-[#2a2a2a]">CREATURE CREATED</span>
                 </div>
 
-                <!-- Interactive 2D Visual Canvas -->
                 <div class="relative w-full h-48 bg-[#0a0a0a] rounded-lg border border-[#222] overflow-hidden flex items-center justify-center">
                     <canvas id="organism-canvas" class="w-full h-full"></canvas>
                     <div id="txt-canvas-overlay" class="absolute top-2 left-2 text-[10px] font-mono text-gray-500 bg-[#111]/80 px-2 py-0.5 rounded border border-[#222]">
@@ -257,7 +256,6 @@
                     </div>
                 </div>
 
-                <!-- Metrics Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                     <div class="p-4 rounded-lg bg-[#181818] border border-[#262626]">
                         <div id="lbl-feat-1" class="text-xs font-mono text-gray-400 mb-1">COLOR & ELECTRIC CHARGE</div>
@@ -287,7 +285,6 @@
                     </div>
                 </div>
 
-                <!-- Sequence Display Card -->
                 <div class="p-4 rounded-lg bg-[#141414] border border-[#222] space-y-3 font-mono text-xs">
                     <div>
                         <span id="lbl-dna-seq" class="text-gray-500 block text-[10px] mb-0.5">FULL DNA CODE AFTER GROWTH:</span>
@@ -304,7 +301,7 @@
     </main>
 
     <script>
-        let editMode = 'letter'; // 'letter', 'string', 'phrase'
+        let editMode = 'letter';
         let baselineAxiom = "ATG TGC AAG";
         let baselineRules = "A->G";
 
@@ -375,13 +372,13 @@
                 const tgt = parts[1].trim();
 
                 if (mode === 'letter') {
-                    if (!SINGLE_LETTERS.includes(src) || !SINGLE_LETTERS.includes(tgt)) {
-                        return { valid: false, msg: "Letter Mode Warning: Rules must only change 1 Single Letter to 1 Single Letter (A, T, C, G)." };
+                    if (src.length !== 1 || tgt.length !== 1 || !SINGLE_LETTERS.includes(src) || !SINGLE_LETTERS.includes(tgt.toUpperCase())) {
+                        return { valid: false, msg: "Letter Mode Error: Multi-letter replacements disallowed! Must be 1 Single Letter -> 1 Single Letter (A, T, C, G)." };
                     }
                 } else if (mode === 'phrase') {
                     const isPhraseTarget = PHRASE_TARGETS.includes(tgt) || tgt.length > 1;
                     if (!isPhraseTarget) {
-                        return { valid: false, msg: "Phrase Mode Warning: Rule target must be a phrase expansion (e.g. A->AT, C->Cys, T->TGC)." };
+                        return { valid: false, msg: "Phrase Mode Error: Targets must expand to multi-letter phrase transformations (e.g. A->AT, C->Cys)." };
                     }
                 }
             }
@@ -550,20 +547,20 @@
 
                 appBadge.textContent = "LETTER MODE ACTIVE";
                 appBadge.className = "px-2.5 py-0.5 text-[10px] font-mono rounded bg-[#4ade80]/10 text-[#4ade80] border border-[#4ade80]/30";
-                essayTitle.textContent = "Single Letter Mutation Scope";
-                essaySubtitle.textContent = "Strict Point Swap Focus";
+                essayTitle.textContent = "Single Letter Point Mutation";
+                essaySubtitle.textContent = "Strict Single-Letter Swap Scope";
                 
                 essayBody.innerHTML = `
-                    <p>In <strong>Letter Edit Mode</strong>, rules strictly accept swaps from <strong>1 Single Letter to 1 Single Letter</strong> (e.g. A->G, C->T).</p>
+                    <p>In <strong>Letter Edit Mode</strong>, rules are strictly restricted to <strong>1 Single Letter to 1 Single Letter</strong> swaps (e.g. A->G, C->T). Multi-letter phrase expansions are disabled.</p>
                 `;
 
                 mechHeader.textContent = "Letter Mode Rules";
                 mechList.innerHTML = `
-                    <li>• <strong>Single Letter Rule:</strong> Strictly changes 1 letter to 1 letter.</li>
-                    <li>• <strong>No Multi-Letter Phrases:</strong> Expansion phrases are disallowed in this mode.</li>
+                    <li>• <strong>Single Letter Rule:</strong> Swaps 1 single letter to 1 single letter.</li>
+                    <li>• <strong>Strict Scope:</strong> Phrases and multi-character targets are blocked.</li>
                 `;
 
-                bannerInfo.innerHTML = "<strong>🔒 Letter Mode Active:</strong> Growth rules strictly limited to 1 single letter ➔ 1 single letter swap.";
+                bannerInfo.innerHTML = "<strong>🔒 Letter Mode Active:</strong> Strictly limited to 1 single letter ➔ 1 single letter replacements.";
 
                 axiomInput.readOnly = false;
                 rulesInput.readOnly = false;
@@ -584,16 +581,16 @@
                 essaySubtitle.textContent = "Full Seed Code Control";
 
                 essayBody.innerHTML = `
-                    <p>In <strong>String Edit Mode</strong>, you have full control over editing, re-ordering, and randomizing full multi-codon sequence seed strings.</p>
+                    <p>In <strong>String Edit Mode</strong>, edit and re-order full multi-codon sequence seed strings while growth rules stay static.</p>
                 `;
 
                 mechHeader.textContent = "String Scope Rules";
                 mechList.innerHTML = `
-                    <li>• <strong>Full Sequence Control:</strong> Modify entire starting DNA strings.</li>
-                    <li>• <strong>Locked Growth Rules:</strong> Growth swap rules remain read-only.</li>
+                    <li>• <strong>Full Sequence Control:</strong> Modify initial starting DNA strings.</li>
+                    <li>• <strong>Locked Growth Rules:</strong> Growth swap rules are set to read-only.</li>
                 `;
 
-                bannerInfo.innerHTML = "<strong>🧬 String Mode Active:</strong> Full edit control granted for starting seed string sequence.";
+                bannerInfo.innerHTML = "<strong>🧬 String Mode Active:</strong> Full edit control for the starting seed string sequence.";
 
                 axiomInput.readOnly = false;
                 rulesInput.readOnly = true;
@@ -614,19 +611,19 @@
                 appBadge.textContent = "PHRASE MODE ACTIVE";
                 appBadge.className = "px-2.5 py-0.5 text-[10px] font-mono rounded bg-purple-500/10 text-purple-400 border border-purple-500/30";
                 essayTitle.textContent = "Rule Phrase Rewrite Scope";
-                essaySubtitle.textContent = "Grammatical Expansion Focus";
+                essaySubtitle.textContent = "Multi-Character Expansion Focus";
 
                 essayBody.innerHTML = `
-                    <p>In <strong>Phrase Edit Mode</strong>, growth rules change characters into dynamic multi-letter developmental phrases (e.g., A->AT, C->Cys).</p>
+                    <p>In <strong>Phrase Edit Mode</strong>, rules change single characters into dynamic multi-letter phrases (e.g., A->AT, C->Cys).</p>
                 `;
 
                 mechHeader.textContent = "Phrase Mode Rules";
                 mechList.innerHTML = `
-                    <li>• <strong>Phrase Expansion:</strong> Converts letters into multi-character biological targets.</li>
-                    <li>• <strong>Single Rule Lock:</strong> Always mutates exactly 1 phrase at a time.</li>
+                    <li>• <strong>Phrase Expansion:</strong> Converts characters into multi-letter developmental phrases.</li>
+                    <li>• <strong>Target Validation:</strong> Requires phrase expansion targets.</li>
                 `;
 
-                bannerInfo.innerHTML = "<strong>🧩 Phrase Mode Active:</strong> Edit control focused on phrase expansion rules.";
+                bannerInfo.innerHTML = "<strong>🧩 Phrase Mode Active:</strong> Focused on phrase expansion growth rules.";
 
                 axiomInput.readOnly = true;
                 rulesInput.readOnly = false;
@@ -808,7 +805,6 @@
                 runSimulation();
             });
 
-            // Mode-Accurate Axiom Randomizer
             document.getElementById('rand-axiom-btn').addEventListener('click', () => {
                 if (editMode === 'letter') {
                     let chars = axiomInput.value.split('');
@@ -833,7 +829,6 @@
                 runSimulation();
             });
 
-            // Mode-Accurate Single Rule Randomizer
             document.getElementById('rand-rules-btn').addEventListener('click', () => {
                 const currentSeed = axiomInput.value.replace(/\s+/g, '').toUpperCase();
                 let presentKeys = SINGLE_LETTERS.filter(b => currentSeed.includes(b));
@@ -842,12 +837,10 @@
                 const chosenKey = presentKeys[Math.floor(Math.random() * presentKeys.length)];
 
                 if (editMode === 'letter') {
-                    // Strictly single letter target guaranteed
                     const eligibleLetters = SINGLE_LETTERS.filter(t => t !== chosenKey);
                     const chosenTarget = eligibleLetters[Math.floor(Math.random() * eligibleLetters.length)];
                     rulesInput.value = `${chosenKey}->${chosenTarget}`;
                 } else {
-                    // Strictly phrase expansion target guaranteed
                     const chosenTarget = PHRASE_TARGETS[Math.floor(Math.random() * PHRASE_TARGETS.length)];
                     rulesInput.value = `${chosenKey}->${chosenTarget}`;
                 }
