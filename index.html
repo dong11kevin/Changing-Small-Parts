@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L-System Morphogenesis | Interactive Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0b0b0b;
+            color: #eaeaea;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .glass-panel {
+            background-color: #151515;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+        }
+        .input-pill {
+            background-color: #1c1c1c;
+            border: 1px solid #2a2a2a;
+            color: #4ade80;
+            transition: all 0.2s ease;
+        }
+        .input-pill:focus {
+            border-color: #4ade80;
+            outline: none;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.15);
+        }
+        .essay-content p {
+            margin-bottom: 1.25rem;
+            line-height: 1.7;
+            color: #d1d5db;
+        }
+        .essay-content strong {
+            color: #fff;
+            font-weight: 600;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0b0b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a2a; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4a4a4a; 
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row">
+
+    <!-- Left Sidebar: Controls & Guide -->
+    <aside class="w-full md:w-1/3 lg:w-2/5 p-6 border-r border-[#2a2a2a] bg-[#0b0b0b] overflow-y-auto md:h-screen sticky top-0 flex flex-col justify-between">
+        <div>
+            <header class="mb-6">
+                <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+                    <span id="app-badge" class="px-2.5 py-0.5 text-[10px] font-mono rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">INTRODUCTION MODE</span>
+                    
+                    <!-- 5-Way Mode Selector (Intro + 4 Modes) -->
+                    <div class="flex items-center space-x-1 bg-[#1a1a1a] p-1 rounded-lg border border-[#333] font-mono text-[11px] flex-wrap">
+                        <button id="mode-btn-intro" class="px-2 py-1 rounded text-cyan-400 bg-[#262626] font-semibold transition cursor-pointer">📖 Intro</button>
+                        <button id="mode-btn-letter" class="px-2 py-1 rounded text-gray-400 hover:text-white transition cursor-pointer">🔤 Letter</button>
+                        <button id="mode-btn-string" class="px-2 py-1 rounded text-gray-400 hover:text-white transition cursor-pointer">🧬 String</button>
+                        <button id="mode-btn-phrase" class="px-2 py-1 rounded text-gray-400 hover:text-white transition cursor-pointer">🧩 Phrase</button>
+                        <button id="mode-btn-testing" class="px-2 py-1 rounded text-gray-400 hover:text-white transition cursor-pointer">🧪 Testing</button>
+                    </div>
+                </div>
+                <h1 id="essay-title" class="text-2xl font-light tracking-tight text-white">How to Use This Simulator</h1>
+                <h2 id="essay-subtitle" class="text-xs font-mono text-cyan-400 tracking-wider uppercase mt-1">Beginner Guide & Mode Overview</h2>
+            </header>
+
+            <div id="essay-body" class="essay-content text-sm text-gray-300 space-y-4">
+                <!-- Dynamically updated -->
+            </div>
+        </div>
+
+        <div class="mt-8 pt-4 border-t border-[#2a2a2a] text-xs text-gray-500 font-mono">
+            <strong>References:</strong> 
+            <a href="https://doi.org/10.1016/0022-5193(68)90079-9" target="_blank" class="text-[#4ade80] hover:underline">Lindenmayer (1968)[cite: 1]</a>, 
+            <a href="https://doi.org/10.1016/0022-2836(82)90515-0" target="_blank" class="text-[#4ade80] hover:underline">Kyte & Doolittle (1982)[cite: 1]</a>
+        </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="w-full md:w-2/3 lg:w-3/5 p-4 md:p-8 flex flex-col min-h-screen overflow-y-auto bg-[#0d0d0d]">
+        <div class="max-w-4xl mx-auto w-full flex-grow flex flex-col space-y-6">
+            
+            <!-- INTRO WELCOME TEXT BLOCK OR AUTO-SOLVER PANEL -->
+            <div id="auto-solver-panel" class="glass-panel p-6 border-2 border-cyan-500/40 space-y-4 bg-gradient-to-r from-[#111c22] to-[#151515]">
+                <div class="flex items-center justify-between border-b border-[#2a2a2a] pb-3">
+                    <h3 id="panel-inverse-title" class="text-white font-semibold uppercase tracking-wider text-xs font-mono flex items-center">
+                        <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 mr-2 animate-pulse inline-block"></span> <span id="txt-inverse-title">Welcome to L-System Morphogenesis</span>
+                    </h3>
+                    <span id="badge-inverse" class="px-2 py-0.5 text-[10px] font-mono rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">QUICK START</span>
+                </div>
+
+                <div id="intro-text-block" class="text-xs text-gray-300 font-mono leading-relaxed space-y-3">
+                    <p>This interactive playground lets you watch simple genetic text strings grow into complex digital organisms using biological growth rules!</p>
+                    <p><strong>Step 1: Choose a Mode.</strong> Use the tab buttons at the top of the left sidebar to switch between the Intro guide and four distinct experimental modes (Letter, String, Phrase, or Testing).</p>
+                    <p><strong>Step 2: Tweak the Rules.</strong> Modify starting seed strings and replacement rules, then use the growth turns slider to watch your digital creature evolve shapes, colors, and armor spikes in real-time.</p>
+                    <p><strong>Step 3: Experiment Freely.</strong> Test out different configurations, or use the Smart Recipe Finder in Testing mode to automatically calculate growth codes matching your desired physical features[cite: 1].</p>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 flex-wrap gap-2">
+                    <button id="jump-to-letter-btn" class="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-semibold font-mono text-xs rounded shadow-lg transition flex items-center space-x-2 cursor-pointer">
+                        <span>🚀 Start Experimenting (Jump to Letter Mode)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- WORKSPACE PLAYGROUND -->
+            <div class="glass-panel p-6 border border-[#2a2a2a] space-y-4">
+                <div class="flex items-center justify-between border-b border-[#2a2a2a] pb-3">
+                    <h3 id="panel-controls-title" class="text-white font-semibold uppercase tracking-wider text-xs font-mono flex items-center">
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-400 mr-2 inline-block"></span> <span id="txt-controls-title">Recipe Playground & Sandbox</span>
+                    </h3>
+                    <span id="badge-controls" class="px-2 py-0.5 text-[10px] font-mono rounded bg-blue-500/10 text-blue-400 border border-blue-500/30">GROWTH CODE</span>
+                </div>
+
+                <!-- Mode Indicator -->
+                <div id="mode-banner-info" class="text-[11px] font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 p-2 rounded">
+                    <strong>📖 Intro Mode Active:</strong> Read the guide on the left to learn how the simulator works.
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Axiom Input -->
+                    <div id="axiom-container" class="space-y-2 transition-opacity">
+                        <div class="flex items-center justify-between">
+                            <label id="lbl-axiom-input" class="text-xs font-mono text-gray-300">Starting Seed Code (Axiom String)</label>
+                            <div class="flex space-x-1">
+                                <button id="rand-axiom-btn" class="px-2 py-0.5 bg-[#222] hover:bg-[#333] border border-[#333] text-[10px] font-mono rounded text-gray-300 transition disabled:opacity-40 disabled:cursor-not-allowed">🎲 Random Mode Seed</button>
+                                <button id="smart-axiom-btn" class="px-2 py-0.5 bg-[#222] hover:bg-[#333] border border-[#333] text-[10px] font-mono rounded text-[#4ade80] transition disabled:opacity-40 disabled:cursor-not-allowed">⚡ Align Rules</button>
+                            </div>
+                        </div>
+                        <input id="axiom-input" type="text" value="ATG TGC AAG GTT GAG" class="w-full input-pill px-3 py-2 rounded text-xs font-mono uppercase tracking-widest read-only:bg-[#151515] read-only:text-gray-500 read-only:border-gray-800 read-only:cursor-not-allowed">
+                    </div>
+
+                    <!-- Rule Input -->
+                    <div id="rules-container" class="space-y-2 transition-opacity flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <label id="lbl-rules-input" class="text-xs font-mono text-gray-300">Growth Swap Rules</label>
+                                <div class="flex space-x-1">
+                                    <button id="rand-rules-btn" class="px-2 py-0.5 bg-[#222] hover:bg-[#333] border border-[#333] text-[10px] font-mono rounded text-gray-300 transition disabled:opacity-40 disabled:cursor-not-allowed">🎲 Random Rule</button>
+                                    <button id="smart-rules-btn" class="px-2 py-0.5 bg-[#222] hover:bg-[#333] border border-[#333] text-[10px] font-mono rounded text-[#4ade80] transition disabled:opacity-40 disabled:cursor-not-allowed">⚡ Reset Rule</button>
+                                </div>
+                            </div>
+                            <input id="rules-input" type="text" value="A->G" class="w-full input-pill px-3 py-2 rounded text-xs font-mono read-only:bg-[#151515] read-only:text-gray-500 read-only:border-gray-800 read-only:cursor-not-allowed">
+                            
+                            <!-- Phrase Mode Fast Controls -->
+                            <div id="single-phrase-controls" class="space-y-1.5 pt-1 hidden">
+                                <span class="text-[10px] font-mono text-gray-400 block">⚡ Phrase Rule Mutators (Expanded Spectrum):</span>
+                                <div class="flex flex-wrap gap-1 text-[11px] font-mono">
+                                    <button id="mutate-phrase-1" class="px-2 py-1 bg-[#222] hover:bg-[#333] border border-[#444] rounded text-emerald-400">A->GAG (Acidic Red)</button>
+                                    <button id="mutate-phrase-2" class="px-2 py-1 bg-[#222] hover:bg-[#333] border border-[#444] rounded text-pink-400">C->TGC (Armored Spike)</button>
+                                    <button id="mutate-phrase-3" class="px-2 py-1 bg-[#222] hover:bg-[#333] border border-[#444] rounded text-purple-400">Random Phrase Swap</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rule Validation Note -->
+                        <div id="rules-validation-note" class="hidden text-[11px] font-mono text-red-400 bg-red-950/40 border border-red-500/30 p-2 rounded mt-2 flex items-center space-x-1">
+                            <span>⚠️</span>
+                            <span id="rules-validation-text">Validation warning message</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Growth Iteration Slider -->
+                <div class="pt-2">
+                    <div class="flex justify-between items-center mb-1">
+                        <label id="lbl-iter-slider" class="text-xs font-mono text-gray-300">How Many Growth Turns?</label>
+                        <span id="iter-val-display" class="text-xs font-mono text-[#4ade80] font-bold">n = 2</span>
+                    </div>
+                    <input id="iter-slider" type="range" min="0" max="4" value="2" class="w-full accent-[#4ade80] bg-[#1a1a1a] h-2 rounded-lg cursor-pointer">
+                    <div class="flex justify-between text-[10px] font-mono text-gray-500 mt-1">
+                        <span>n=0 (Seed)</span>
+                        <span>n=1</span>
+                        <span>n=2</span>
+                        <span>n=3</span>
+                        <span>n=4 (Max)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VISUAL CREATURE CANVAS & PHENOTYPE DISPLAY -->
+            <div id="phenotype-text-panel" class="glass-panel p-6 border border-[#2a2a2a] space-y-4">
+                <div class="flex items-center justify-between border-b border-[#2a2a2a] pb-3">
+                    <h3 id="panel-expressed-title" class="text-white font-semibold uppercase tracking-wider text-xs font-mono flex items-center">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#4ade80] mr-2 inline-block"></span> <span id="txt-expressed-title">Grown Creature Body & Features</span>
+                    </h3>
+                    <span id="text-status-badge" class="px-2.5 py-1 text-xs font-mono rounded bg-[#1c1c1c] text-[#4ade80] border border-[#2a2a2a]">CREATURE CREATED</span>
+                </div>
+
+                <div class="relative w-full h-56 bg-[#0a0a0a] rounded-lg border border-[#222] overflow-hidden flex items-center justify-center">
+                    <canvas id="organism-canvas" class="w-full h-full"></canvas>
+                    <div id="txt-canvas-overlay" class="absolute top-2 left-2 text-[10px] font-mono text-gray-500 bg-[#111]/80 px-2 py-0.5 rounded border border-[#222]">
+                        Dynamic Circular Morphological Visualizer
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                    <div class="p-4 rounded-lg bg-[#181818] border border-[#262626]">
+                        <div id="lbl-feat-1" class="text-xs font-mono text-gray-400 mb-1">COLOR SPECTRUM & CHARGE</div>
+                        <div id="feature-color-name" class="text-lg font-bold text-white mb-1">Neutral Green</div>
+                        <div id="feature-color-details" class="text-xs text-gray-400 font-mono space-y-1">
+                            <div>Net Charge: <span id="feature-charge-val" class="text-gray-200">0.0 e</span></div>
+                            <div>Hue Angle: <span id="feature-hue-val" class="text-gray-200">120°</span></div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-lg bg-[#181818] border border-[#262626]">
+                        <div id="lbl-feat-2" class="text-xs font-mono text-gray-400 mb-1">SIZE & MASS DENSITY</div>
+                        <div id="feature-scale-name" class="text-lg font-bold text-white mb-1">Standard Membrane</div>
+                        <div id="feature-scale-details" class="text-xs text-gray-400 font-mono space-y-1">
+                            <div>Hydropathy: <span id="feature-hydro-val" class="text-gray-200">0.00</span></div>
+                            <div>Mass: <span id="feature-mass-val" class="text-gray-200">0.00 kDa</span></div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-lg bg-[#181818] border border-[#262626]">
+                        <div id="lbl-feat-3" class="text-xs font-mono text-gray-400 mb-1">ARMOR SPIKES & BRIDGES</div>
+                        <div id="feature-topology-name" class="text-lg font-bold text-white mb-1">0 Active Bridges</div>
+                        <div id="feature-topology-details" class="text-xs text-gray-400 font-mono space-y-1">
+                            <div>Disulfide Bridges: <span id="feature-bonds-val" class="text-gray-200">0 Cys-Cys</span></div>
+                            <div>Secondary Structure: <span id="feature-ss-val" class="text-gray-200">Coil/Unstructured</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-lg bg-[#141414] border border-[#222] space-y-3 font-mono text-xs">
+                    <div>
+                        <span id="lbl-dna-seq" class="text-gray-500 block text-[10px] mb-0.5">FULL DNA CODE AFTER GROWTH:</span>
+                        <div id="feature-dna-seq" class="text-emerald-400 break-all select-all">ATG TGC AAG GTT GAG</div>
+                    </div>
+                    <div>
+                        <span id="lbl-amino-seq" class="text-gray-500 block text-[10px] mb-0.5">BUILDING BLOCKS (PROTEIN PIECES):</span>
+                        <div id="feature-amino-seq" class="text-blue-300 text-sm tracking-widest break-all select-all">M C K V E</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        let editMode = 'intro';
+        let baselineAxiom = "ATG TGC AAG GTT GAG";
+        let baselineRules = "A->G";
+        let lastFourGenResult = "";
+
+        const SINGLE_LETTERS = ["A", "T", "C", "G"];
+        const PHRASE_TARGETS = ["Cys", "AAG", "GAG", "TGC", "GTT", "AT", "AG", "CGC", "AAA"];
+
+        const CODON_POOL = {
+            cysteine: ["TGC", "TGT"],
+            basicPositive: ["AAG", "AAA", "CGC", "CGT"],
+            acidicNegative: ["GAG", "GAA", "GAC", "GAT"],
+            hydrophobic: ["GTT", "GTC", "GTA", "GTG", "ATT", "ATC", "TTT", "TTC", "CTT", "CTG"],
+            neutral: ["GCT", "GCC", "GCA", "GCG", "ATG"]
+        };
+
+        const essayTitle = document.getElementById('essay-title');
+        const essaySubtitle = document.getElementById('essay-subtitle');
+        const essayBody = document.getElementById('essay-body');
+        const appBadge = document.getElementById('app-badge');
+
+        const btnIntro = document.getElementById('mode-btn-intro');
+        const btnLetter = document.getElementById('mode-btn-letter');
+        const btnString = document.getElementById('mode-btn-string');
+        const btnPhrase = document.getElementById('mode-btn-phrase');
+        const btnTesting = document.getElementById('mode-btn-testing');
+
+        const axiomInput = document.getElementById('axiom-input');
+        const rulesInput = document.getElementById('rules-input');
+        const iterSlider = document.getElementById('iter-slider');
+        const iterValDisplay = document.getElementById('iter-val-display');
+
+        const phraseControls = document.getElementById('single-phrase-controls');
+        const bannerInfo = document.getElementById('mode-banner-info');
+        const autoSolverPanel = document.getElementById('auto-solver-panel');
+
+        const axiomContainer = document.getElementById('axiom-container');
+        const rulesContainer = document.getElementById('rules-container');
+        const randAxiomBtn = document.getElementById('rand-axiom-btn');
+        const smartAxiomBtn = document.getElementById('smart-axiom-btn');
+        const randRulesBtn = document.getElementById('rand-rules-btn');
+        const smartRulesBtn = document.getElementById('smart-rules-btn');
+
+        const rulesValidationNote = document.getElementById('rules-validation-note');
+        const rulesValidationText = document.getElementById('rules-validation-text');
+
+        const codonTable = {
+            'ATG': 'M', 'TGC': 'C', 'TGT': 'C', 'AAG': 'K', 'AAA': 'K',
+            'CGC': 'R', 'CGT': 'R', 'CGA': 'R', 'CGG': 'R', 'AGA': 'R', 'AGG': 'R',
+            'GAG': 'E', 'GAA': 'E', 'GAC': 'D', 'GAT': 'D', 'GCT': 'A', 'GCC': 'A',
+            'GCA': 'A', 'GCG': 'A', 'GTT': 'V', 'GTC': 'V', 'GTA': 'V', 'GTG': 'V',
+            'ATT': 'I', 'ATC': 'I', 'ATA': 'I', 'TTA': 'L', 'TTG': 'L', 'CTT': 'L',
+            'CTC': 'L', 'CTA': 'L', 'CTG': 'L', 'TTT': 'F', 'TTC': 'F'
+        };
+
+        function parseProductionRules(rulesStr) {
+            const ruleMap = {};
+            const pairs = rulesStr.split(',');
+            pairs.forEach(pair => {
+                const parts = pair.split('->');
+                if (parts.length === 2) {
+                    const key = parts[0].trim().toUpperCase();
+                    const val = parts[1].trim();
+                    if (key) ruleMap[key] = val;
+                }
+            });
+            return ruleMap;
+        }
+
+        function validateRuleModeStrictness(rulesStr, mode) {
+            if (mode === 'intro' || mode === 'testing') return { valid: true };
+
+            const pairs = rulesStr.split(',').map(s => s.trim()).filter(Boolean);
+            if (pairs.length === 0) return { valid: false, msg: "Rule cannot be empty." };
+
+            for (let pair of pairs) {
+                const parts = pair.split('->');
+                if (parts.length !== 2) return { valid: false, msg: "Rule must use format 'Source->Target'." };
+                const src = parts[0].trim().toUpperCase();
+                const tgt = parts[1].trim();
+
+                if (mode === 'string') {
+                    return { valid: true };
+                } else if (mode === 'letter') {
+                    if (src.length !== 1 || tgt.length !== 1 || !SINGLE_LETTERS.includes(src) || !SINGLE_LETTERS.includes(tgt.toUpperCase())) {
+                        return { valid: false, msg: "Letter Mode Error: Must be 1 Single Letter -> 1 Single Letter (A, T, C, G)." };
+                    }
+                } else if (mode === 'phrase') {
+                    const isPhraseTarget = PHRASE_TARGETS.includes(tgt) || tgt.length > 1;
+                    if (!isPhraseTarget) {
+                        return { valid: false, msg: "Phrase Mode Error: Target must expand into multi-letter phrases." };
+                    }
+                }
+            }
+            return { valid: true };
+        }
+
+        function expandLSystem(axiom, rulesStr, iterations) {
+            if (editMode === 'intro') return axiom.replace(/\s+/g, '').toUpperCase();
+            let current = axiom.replace(/\s+/g, '').toUpperCase();
+            const rules = parseProductionRules(rulesStr);
+
+            for (let i = 0; i < iterations; i++) {
+                let next = '';
+                let j = 0;
+                while (j < current.length) {
+                    let matched = false;
+                    const keys = Object.keys(rules).sort((a, b) => b.length - a.length);
+                    for (let key of keys) {
+                        if (current.substr(j, key.length) === key) {
+                            next += rules[key];
+                            j += key.length;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        next += current[j];
+                        j++;
+                    }
+                }
+                current = next;
+            }
+            return current;
+        }
+
+        function translateORF(dna) {
+            let cleanDNA = dna.replace(/[^ATCG]/g, '');
+            if (!cleanDNA) cleanDNA = dna.toUpperCase();
+
+            let startIdx = cleanDNA.indexOf('ATG');
+            if (startIdx === -1) startIdx = 0;
+
+            const aminoAcids = [];
+            for (let i = startIdx; i + 3 <= cleanDNA.length; i += 3) {
+                const codon = cleanDNA.substr(i, 3);
+                const aa = codonTable[codon] || 'A';
+                aminoAcids.push(aa);
+            }
+
+            if (aminoAcids.length === 0) aminoAcids.push('M');
+            return { cleanDNA, aminoAcids };
+        }
+
+        function drawOrganismCanvas(charge, hydroScore, disulfideBonds, length, aaList) {
+            const canvas = document.getElementById('organism-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+
+            const width = canvas.width;
+            const height = canvas.height;
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            ctx.clearRect(0, 0, width, height);
+
+            let rawHue = 180 + (charge * 40) - (hydroScore * 25);
+            let hue = (rawHue % 360 + 360) % 360; 
+
+            const sizeFactor = Math.max(0.6, Math.min(2.2, 1.0 - (hydroScore * 0.15) + (length * 0.03)));
+            const baseRadius = Math.max(20, Math.min(75, 38 * sizeFactor));
+
+            const coreColor = `hsl(${hue}, 85%, 55%)`;
+            const innerGlow = `hsla(${hue}, 90%, 65%, 0.4)`;
+            const outerGlow = `hsla(${hue}, 80%, 40%, 0.15)`;
+
+            const gradient = ctx.createRadialGradient(centerX, centerY, baseRadius * 0.2, centerX, centerY, baseRadius * 2.2);
+            gradient.addColorStop(0, innerGlow);
+            gradient.addColorStop(0.6, outerGlow);
+            gradient.addColorStop(1, 'transparent');
+
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, baseRadius * 2.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = coreColor;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, baseRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            if (disulfideBonds > 0) {
+                const totalSpikes = Math.min(24, disulfideBonds * 6);
+                ctx.strokeStyle = '#f43f5e';
+                ctx.lineWidth = 2.5;
+
+                for (let i = 0; i < totalSpikes; i++) {
+                    const angle = (i / totalSpikes) * Math.PI * 2;
+                    const spikeLen = 12 + (disulfideBonds * 3);
+                    
+                    const x1 = centerX + Math.cos(angle) * baseRadius;
+                    const y1 = centerY + Math.sin(angle) * baseRadius;
+                    
+                    const x2 = centerX + Math.cos(angle) * (baseRadius + spikeLen);
+                    const y2 = centerY + Math.sin(angle) * (baseRadius + spikeLen);
+
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#fb7185';
+                    ctx.beginPath();
+                    ctx.arc(x2, y2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        function updateTraitLabels(charge, hydroScore, disulfideBonds, length) {
+            const colorName = document.getElementById('feature-color-name');
+            if (charge >= 3.0) colorName.textContent = "Ultra-Violet Basic";
+            else if (charge >= 1.0) colorName.textContent = "Positively Charged Blue";
+            else if (charge === 0) colorName.textContent = "Neutral Isoelectric Green";
+            else if (charge > -3.0) colorName.textContent = "Amber Acidic";
+            else colorName.textContent = "Crimson Acidic Red";
+
+            const scaleName = document.getElementById('feature-scale-name');
+            if (hydroScore > 1.2) scaleName.textContent = "Compact Sphere";
+            else if (hydroScore < -1.2) scaleName.textContent = "Expanded Soluble Sphere";
+            else scaleName.textContent = "Standard Circular Core";
+
+            const topoName = document.getElementById('feature-topology-name');
+            const ssVal = document.getElementById('feature-ss-val');
+            if (disulfideBonds === 0) {
+                topoName.textContent = "0 Active Bridges";
+                ssVal.textContent = "Flexible Random Coil";
+            } else if (disulfideBonds === 1) {
+                topoName.textContent = "1 Perpendicular Bridge";
+                ssVal.textContent = "Single Radial Spoke";
+            } else if (disulfideBonds === 2) {
+                topoName.textContent = "2 Reinforced Bridges";
+                ssVal.textContent = "Dual Radial Spikes";
+            } else {
+                topoName.textContent = `${disulfideBonds} Perpendicular Bridges`;
+                ssVal.textContent = "Hyper-Armored Radial Mesh";
+            }
+        }
+
+        function setEditMode(mode) {
+            editMode = mode;
+            const activeBtn = "px-2 py-1 rounded bg-[#262626] font-semibold transition cursor-pointer";
+            const inactiveBtn = "px-2 py-1 rounded text-gray-400 hover:text-white transition cursor-pointer";
+
+            btnIntro.className = mode === 'intro' ? `${activeBtn} text-cyan-400` : inactiveBtn;
+            btnLetter.className = mode === 'letter' ? `${activeBtn} text-[#4ade80]` : inactiveBtn;
+            btnString.className = mode === 'string' ? `${activeBtn} text-blue-400` : inactiveBtn;
+            btnPhrase.className = mode === 'phrase' ? `${activeBtn} text-purple-400` : inactiveBtn;
+            btnTesting.className = mode === 'testing' ? `${activeBtn} text-yellow-400` : inactiveBtn;
+
+            baselineAxiom = axiomInput.value;
+            rulesValidationNote.classList.add('hidden');
+
+            if (mode === 'intro') {
+                autoSolverPanel.classList.remove('hidden');
+                autoSolverPanel.className = "glass-panel p-6 border-2 border-cyan-500/40 space-y-4 bg-gradient-to-r from-[#111c22] to-[#151515]";
+                document.getElementById('panel-inverse-title').innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-cyan-400 mr-2 animate-pulse inline-block"></span> <span>Welcome to L-System Morphogenesis</span>';
+                document.getElementById('badge-inverse').textContent = "QUICK START";
+                document.getElementById('badge-inverse').className = "px-2 py-0.5 text-[10px] font-mono rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30";
+                
+                document.getElementById('intro-text-block').innerHTML = `
+                    <p>This interactive playground lets you watch simple genetic text strings grow into complex digital organisms using biological growth rules!</p>
+                    <p><strong>Step 1: Choose a Mode.</strong> Use the tab buttons at the top of the left sidebar to switch between the Intro guide and four distinct experimental modes (Letter, String, Phrase, or Testing).</p>
+                    <p><strong>Step 2: Tweak the Rules.</strong> Modify starting seed strings and replacement rules, then use the growth turns slider to watch your digital creature evolve shapes, colors, and armor spikes in real-time.</p>
+                    <p><strong>Step 3: Experiment Freely.</strong> Test out different configurations, or use the Smart Recipe Finder in Testing mode to automatically calculate growth codes matching your desired physical features[cite: 1].</p>
+                `;
+                
+                appBadge.textContent = "INTRODUCTION MODE";
+                appBadge.className = "px-2.5 py-0.5 text-[10px] font-mono rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30";
+                essayTitle.textContent = "How to Use This Simulator";
+                essaySubtitle.textContent = "Beginner Guide & Mode Overview";
+                
+                essayBody.innerHTML = `
+                    <p>Welcome! This application simulates <strong>L-Systems (Lindenmayer systems)</strong>—mathematical rules that mimic biological growth[cite: 1]. You start with a genetic seed string and apply growth rules over several turns to see what kind of creature forms.</p>
+                    <p><strong>Here is what each button and box does:</strong></p>
+                    <p>📖 <strong>Intro Tab:</strong> Explains how everything works and helps you get started quickly[cite: 1].</p>
+                    <p>🔤 <strong>Letter Mode:</strong> Restricts you to simple single-letter point mutations by swapping a single individual letter for another.</p>
+                    <p>🧬 <strong>String Mode:</strong> Unlocks the starting seed text box so you can manually type or edit the entire genetic string directly.</p>
+                    <p>🧩 <strong>Phrase Mode:</strong> Focuses on multi-character expansion, allowing you to turn a single letter into a longer word or phrase.</p>
+                    <p>🧪 <strong>Testing Mode:</strong> An unrestricted sandbox where all buttons, fields, and rule mutators are fully unlocked.</p>
+                    <p>• <strong>Starting Seed Code Box:</strong> Holds the foundational genetic sequence (the axiom) that your digital creature grows from[cite: 1].</p>
+                    <p>• <strong>Random Mode Seed:</strong> Instantly generates a randomized starting DNA sequence built from biological codons[cite: 1].</p>
+                    <p>• <strong>Four Generations / Align Rules:</strong> Sets up a high-complexity seed code optimized specifically for 4 growth turns[cite: 1].</p>
+                    <p>• <strong>Growth Swap Rules Box:</strong> Defines replacement rules telling the simulator which letters transform during each growth turn[cite: 1].</p>
+                    <p>• <strong>Random Rule:</strong> Picks an active letter from your seed code and assigns a random mutation or phrase replacement rule to it[cite: 1].</p>
+                    <p>• <strong>Reset Rule:</strong> Resets your growth replacement rules back to their default baseline state[cite: 1].</p>
+                    <p>• <strong>Phrase Rule Mutators:</strong> Fast-action buttons below the rule input that instantly apply specific expansion phrases to shape colors or add armor spikes[cite: 1].</p>
+                    <p>• <strong>Growth Iteration Slider:</strong> Controls how many generations of growth your rules go through from n=0 up to n=4[cite: 1].</p>
+                    
+                    <hr class="border-[#2a2a2a] my-4">
+                    
+                    <p><strong>In-Depth Research Overview:</strong></p>
+                    <p>This simulator models L-System Morphogenesis, a mathematical framework developed in 1968 to simulate the growth processes of plants and biological organisms using recursive string rewriting[cite: 1]. The base alphabet consists of genetic codons acting as biological building blocks[cite: 1]. String Mode represents the initial genotype, allowing users to alter raw genetic instructions before growth begins. Letter Mode restricts changes to single-character point mutations, mimicking micro-mutations that cause subtle phenotypic shifts[cite: 1]. In contrast, Phrase Mode allows a single letter to rewrite into an entire multi-character phrase, simulating gene insertions and rapid genetic expansion[cite: 1]. As these rules apply recursively over multiple growth turns from iteration zero to four, the resulting genetic sequence scales exponentially[cite: 1]. Small results occur at lower iteration steps or via strict single-letter point mutations, producing minimal protein mass and basic circular cores. Medium results are achieved at moderate iterations to form distinct charge characteristics and initial structural features. Big results are reached at maximum growth turns or through deep phrase expansions, translating into large protein structures, complex color spectra, and dense armor spikes[cite: 1].</p>
+                `;
+
+                bannerInfo.innerHTML = "<strong>📖 Intro Mode Active:</strong> Read the guide on the left to learn how the simulator works.";
+                bannerInfo.className = "text-[11px] font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 p-2 rounded";
+
+                axiomInput.readOnly = true;
+                rulesInput.readOnly = true;
+                randAxiomBtn.disabled = true;
+                randRulesBtn.disabled = true;
+                smartRulesBtn.disabled = true;
+                smartAxiomBtn.style.display = 'none';
+
+                axiomContainer.classList.add('opacity-50');
+                rulesContainer.classList.add('opacity-50');
+                phraseControls.classList.add('hidden');
+
+            } else if (mode === 'testing') {
+                autoSolverPanel.classList.remove('hidden');
+                autoSolverPanel.className = "glass-panel p-6 border-2 border-[#4ade80]/40 space-y-4 bg-gradient-to-r from-[#111f16] to-[#151515]";
+                document.getElementById('panel-inverse-title').innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-[#4ade80] mr-2 animate-pulse inline-block"></span> <span id="txt-inverse-title">Testing Mode & Button Guide</span>';
+                document.getElementById('badge-inverse').textContent = "BUTTON DIRECTORY";
+                document.getElementById('badge-inverse').className = "px-2 py-0.5 text-[10px] font-mono rounded bg-[#4ade80]/10 text-[#4ade80] border border-[#4ade80]/30";
+                
+                document.getElementById('intro-text-block').innerHTML = `
+                    <p>In <strong>Testing Mode</strong>, all controls are unlocked. Here is a breakdown of what every button does:</p>
+                    <p><strong>Random Mode Seed:</strong> Instantly generates a randomized starting DNA string using biological codons.</p>
+                    <p><strong>Four Generations / Align Rules:</strong> Automatically sets up a high-complexity seed code optimized for 4 growth iterations.</p>
+                    <p><strong>Random Rule:</strong> Picks a random letter from your seed code and assigns a random mutation or phrase replacement rule to it.</p>
+                    <p><strong>Reset Rule:</strong> Resets your growth replacement rules back to the default baseline state.</p>
+                    <p><strong>Phrase Rule Mutators:</strong> Fast-action buttons below the rule input that instantly apply specific expansion phrases to shape colors or add armor spikes.</p>
+                `;
+
+                smartAxiomBtn.style.display = 'inline-block';
+                smartAxiomBtn.textContent = "Four Generations";
+
+                appBadge.textContent = "TESTING MODE ACTIVE";
+                appBadge.className = "px-2.5 py-0.5 text-[10px] font-mono rounded bg-yellow-500/10 text-yellow-400 border border-yellow-500/30";
+                essayTitle.textContent = "Testing Sandbox";
+                essaySubtitle.textContent = "Unrestricted Rule Experimentation";
+
+                essayBody.innerHTML = `
+                    <p>In <strong>Testing Mode</strong>, there are no guardrails or restrictions. You have full freedom to write any custom seed strings and any complex replacement rules you want.</p>
+                    <p>Use the button guide above to understand how each helper button modifies your experiment instantly.</p>
+                `;
+
+                bannerInfo.innerHTML = "<strong>🧪 Testing Mode Active:</strong> There are no restrictions. Fully unrestricted sandbox.";
+                bannerInfo.className = "text-[11px] font-mono text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 p-2 rounded";
+
+                axiomInput.readOnly = false;
+                rulesInput.readOnly = false;
+                randAxiomBtn.disabled = false;
+                randRulesBtn.disabled = false;
+                smartRulesBtn.disabled = false;
+
+                axiomContainer.classList.remove('opacity-50');
+                rulesContainer.classList.remove('opacity-50');
+                phraseControls.classList.remove('hidden');
+
+            } else {
+                autoSolverPanel.classList.add('hidden');
+                smartAxiomBtn.style.display = 'none';
+
+                if (mode === 'letter') {
+                    rulesInput.value = "A->G";
+                    baselineRules = rulesInput.value;
+
+                    appBadge.textContent = "LETTER MODE ACTIVE";
+                    appBadge.className = "px-2.5 py-0.5 text-[10px] font-mono rounded bg-[#4ade80]/10 text-[#4ade80] border border-[#4ade80]/30";
+                    essayTitle.textContent = "Single Letter Point Mutation";
+                    essaySubtitle.textContent = "Simple Single-Letter Changes";
+                    
+                    essayBody.innerHTML = `
+                        <p>This mode allows only one letter changes. You can swap a single letter for another single letter to modify your creature's traits in small steps.</p>
+                        <p><strong>How to play:</strong> Change the rule from <code>A->G</code> to another letter swap, then adjust the growth turns slider to see how the organism mutates.</p>
+                    `;
+
+                    bannerInfo.innerHTML = "<strong>🔤 Letter Mode Active:</strong> This mode allows only one letter changes.";
+                    bannerInfo.className = "text-[11px] font-mono text-[#4ade80] bg-[#4ade80]/10 border border-[#4ade80]/20 p-2 rounded";
+
+                    axiomInput.readOnly = false;
+                    rulesInput.readOnly = false;
+                    randAxiomBtn.disabled = false;
+                    randRulesBtn.disabled = false;
+                    smartRulesBtn.disabled = false;
+
+                    axiomContainer.classList.remove('opacity-50');
+                    rulesContainer.classList.remove('opacity-50');
+                    phraseControls.classList.add('hidden');
+
+                } else if (mode === 'string') {
+                    appBadge.textContent = "STRING MODE ACTIVE";
+                    appBadge.className = "px-2.5 py-0.5 text-[10px] font-mono rounded bg-blue-500/10 text-blue-400 border border-blue-500/30";
+                    essayTitle.textContent = "Axiom String Sequence";
+                    essaySubtitle.textContent = "Full Seed Code Control";
+
+                    essayBody.innerHTML = `
+                        <p>This mode allows you to edit the full text string directly. You can type or change the whole starting seed code sequence to see how different initial codes affect growth.</p>
+                    `;
+
+                    bannerInfo.innerHTML = "<strong>🧬 String Mode Active:</strong> This mode allows you to edit the full text string directly.";
+                    bannerInfo.className = "text-[11px] font-mono text-blue-400 bg-blue-500/10 border border-blue-500/20 p-2 rounded";
+
+                    axiomInput.readOnly = false;
+                    rulesInput.readOnly = true;
+                    randAxiomBtn.disabled = false;
+                    randRulesBtn.disabled = true;
+                    smartRulesBtn.disabled = true;
+
+                    axiomContainer.classList.remove('opacity-50');
+                    rulesContainer.classList.add('opacity-50');
+                    phraseControls.classList.add('hidden');
+
+                } else if (mode === 'phrase') {
+                    rulesInput.value = "A->GAG";
+                    baselineRules = rulesInput.value;
+
+                    appBadge.textContent = "PHRASE MODE ACTIVE";
+                    appBadge.className = "px-2.5 py-0.5 text-[10px] font-mono rounded bg-purple-500/10 text-purple-400 border border-purple-500/30";
+                    essayTitle.textContent = "Rule Phrase Rewrite";
+                    essaySubtitle.textContent = "Multi-Character Expansion Focus";
+
+                    essayBody.innerHTML = `
+                        <p>This mode allows whole phrase changes. You can expand a single letter into a longer multi-letter phrase or word to grow your creature much faster with every turn.</p>
+                    `;
+
+                    bannerInfo.innerHTML = "<strong>🧩 Phrase Mode Active:</strong> This mode allows whole phrase changes.";
+                    bannerInfo.className = "text-[11px] font-mono text-purple-400 bg-purple-500/10 border border-purple-500/20 p-2 rounded";
+
+                    axiomInput.readOnly = true;
+                    rulesInput.readOnly = false;
+                    randAxiomBtn.disabled = true;
+                    randRulesBtn.disabled = false;
+                    smartRulesBtn.disabled = false;
+
+                    axiomContainer.classList.add('opacity-50');
+                    rulesContainer.classList.remove('opacity-50');
+                    phraseControls.classList.remove('hidden');
+                }
+            }
+
+            runSimulation();
+        }
+
+        function runSimulation() {
+            if (editMode === 'intro') {
+                document.getElementById('feature-dna-seq').textContent = "ATG TGC AAG GTT GAG";
+                document.getElementById('feature-amino-seq').textContent = "M C K V E";
+                document.getElementById('feature-charge-val').textContent = "+0.0 e";
+                document.getElementById('feature-hue-val').textContent = "120°";
+                document.getElementById('feature-hydro-val').textContent = "0.00";
+                document.getElementById('feature-mass-val').textContent = "0.55 kDa";
+                document.getElementById('feature-bonds-val').textContent = "1 Cys-Cys";
+                updateTraitLabels(0, 0, 1, 5);
+                drawOrganismCanvas(0, 0, 1, 5, ['M', 'C', 'K', 'V', 'E']);
+                return;
+            }
+
+            const check = validateRuleModeStrictness(rulesInput.value, editMode);
+
+            if (!check.valid) {
+                rulesValidationNote.classList.remove('hidden');
+                rulesValidationText.textContent = check.msg;
+            } else {
+                rulesValidationNote.classList.add('hidden');
+            }
+
+            const axiom = axiomInput.value;
+            const rules = check.valid ? rulesInput.value : "";
+            const iterations = parseInt(iterSlider.value);
+            iterValDisplay.textContent = `n = ${iterations}`;
+
+            const expandedDNA = expandLSystem(axiom, rules, iterations);
+            const { cleanDNA, aminoAcids } = translateORF(expandedDNA);
+
+            let charge = 0;
+            let cysCount = 0;
+            aminoAcids.forEach(aa => {
+                if (['K', 'R'].includes(aa)) charge += 1.0;
+                if (['E', 'D'].includes(aa)) charge -= 1.0;
+                if (aa === 'C') cysCount++;
+            });
+
+            const disulfideBonds = Math.floor(cysCount / 2);
+            const hydroScore = (aminoAcids.filter(a => ['A', 'V', 'I', 'L', 'M', 'F'].includes(a)).length / aminoAcids.length) * 4 - 2;
+
+            document.getElementById('feature-dna-seq').textContent = cleanDNA;
+            document.getElementById('feature-amino-seq').textContent = aminoAcids.join(' ');
+            document.getElementById('feature-charge-val').textContent = `${charge >= 0 ? '+' : ''}${charge.toFixed(1)} e`;
+            
+            let rawHue = 180 + (charge * 40) - (hydroScore * 25);
+            let hue = (rawHue % 360 + 360) % 360; 
+            document.getElementById('feature-hue-val').textContent = `${Math.round(hue)}°`;
+            
+            document.getElementById('feature-hydro-val').textContent = hydroScore.toFixed(2);
+            document.getElementById('feature-mass-val').textContent = `${(aminoAcids.length * 0.11).toFixed(2)} kDa`;
+            document.getElementById('feature-bonds-val').textContent = `${disulfideBonds} Cys-Cys`;
+
+            updateTraitLabels(charge, hydroScore, disulfideBonds, aminoAcids.length);
+            drawOrganismCanvas(charge, hydroScore, disulfideBonds, aminoAcids.length, aminoAcids);
+        }
+
+        function runEvolutionarySolver() {
+            const statusContainer = document.getElementById('evolution-status');
+            const statusText = document.getElementById('evolution-text');
+            if(statusContainer) statusContainer.classList.remove('hidden');
+
+            let generation = 0;
+            const maxGen = 15;
+
+            const interval = setInterval(() => {
+                generation++;
+                if(statusText) statusText.textContent = `Evolving Generation ${generation}/${maxGen}...`;
+
+                if (generation >= maxGen) {
+                    clearInterval(interval);
+                    if(statusContainer) statusContainer.classList.add('hidden');
+
+                    let evolvedAxiom = "ATG TGC AAG GTT GAG";
+                    let evolvedRules = "A->G";
+
+                    axiomInput.value = evolvedAxiom;
+                    rulesInput.value = evolvedRules;
+                    iterSlider.value = 2;
+                    
+                    baselineAxiom = evolvedAxiom;
+                    baselineRules = evolvedRules;
+
+                    runSimulation();
+                }
+            }, 80);
+        }
+
+        function generateHighVariabilitySeed() {
+            const getRandomCodon = (category) => {
+                const list = CODON_POOL[category];
+                return list[Math.floor(Math.random() * list.length)];
+            };
+
+            const codonCount = Math.floor(Math.random() * 6) + 3; 
+            const newCodons = ["ATG"];
+
+            const archetype = Math.floor(Math.random() * 4);
+
+            for (let i = 1; i < codonCount; i++) {
+                if (archetype === 0) {
+                    const pool = Math.random() < 0.6 ? 'cysteine' : (Math.random() < 0.5 ? 'hydrophobic' : 'basicPositive');
+                    newCodons.push(getRandomCodon(pool));
+                } else if (archetype === 1) {
+                    const pool = Math.random() < 0.7 ? 'basicPositive' : 'neutral';
+                    newCodons.push(getRandomCodon(pool));
+                } else if (archetype === 2) {
+                    const pool = Math.random() < 0.7 ? 'acidicNegative' : 'hydrophobic';
+                    newCodons.push(getRandomCodon(pool));
+                } else {
+                    const pool = Math.random() < 0.7 ? 'hydrophobic' : 'cysteine';
+                    newCodons.push(getRandomCodon(pool));
+                }
+            }
+
+            return newCodons.join(" ");
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            btnIntro.addEventListener('click', () => setEditMode('intro'));
+            btnLetter.addEventListener('click', () => setEditMode('letter'));
+            btnString.addEventListener('click', () => setEditMode('string'));
+            btnPhrase.addEventListener('click', () => setEditMode('phrase'));
+            btnTesting.addEventListener('click', () => setEditMode('testing'));
+
+            document.getElementById('jump-to-letter-btn').addEventListener('click', () => setEditMode('letter'));
+
+            document.getElementById('mutate-phrase-1').addEventListener('click', () => {
+                rulesInput.value = 'A->GAG';
+                baselineRules = rulesInput.value;
+                runSimulation();
+            });
+
+            document.getElementById('mutate-phrase-2').addEventListener('click', () => {
+                rulesInput.value = 'C->TGC';
+                baselineRules = rulesInput.value;
+                runSimulation();
+            });
+
+            document.getElementById('mutate-phrase-3').addEventListener('click', () => {
+                const currentSeed = axiomInput.value.replace(/\s+/g, '').toUpperCase();
+                let present = SINGLE_LETTERS.filter(b => currentSeed.includes(b));
+                if (present.length === 0) present = SINGLE_LETTERS;
+
+                const src = present[Math.floor(Math.random() * present.length)];
+                const tgt = PHRASE_TARGETS[Math.floor(Math.random() * PHRASE_TARGETS.length)];
+
+                rulesInput.value = `${src}->${tgt}`;
+                baselineRules = rulesInput.value;
+                runSimulation();
+            });
+
+            document.getElementById('rand-axiom-btn').addEventListener('click', () => {
+                axiomInput.value = generateHighVariabilitySeed();
+                baselineAxiom = axiomInput.value;
+                runSimulation();
+            });
+
+            smartAxiomBtn.addEventListener('click', () => {
+                if (editMode === 'testing') {
+                    let newResult;
+                    do {
+                        newResult = generateHighVariabilitySeed() + " TGC";
+                    } while (newResult === lastFourGenResult);
+                    lastFourGenResult = newResult;
+
+                    axiomInput.value = newResult;
+                    baselineAxiom = axiomInput.value;
+                    iterSlider.value = 4;
+                    runSimulation();
+                }
+            });
+
+            document.getElementById('rand-rules-btn').addEventListener('click', () => {
+                const currentSeed = axiomInput.value.replace(/\s+/g, '').toUpperCase();
+                let presentKeys = SINGLE_LETTERS.filter(b => currentSeed.includes(b));
+                if (presentKeys.length === 0) presentKeys = SINGLE_LETTERS;
+                
+                const chosenKey = presentKeys[Math.floor(Math.random() * presentKeys.length)];
+
+                if (editMode === 'letter') {
+                    const eligibleLetters = SINGLE_LETTERS.filter(t => t !== chosenKey);
+                    const chosenTarget = eligibleLetters[Math.floor(Math.random() * eligibleLetters.length)];
+                    rulesInput.value = `${chosenKey}->${chosenTarget}`;
+                } else {
+                    const chosenTarget = PHRASE_TARGETS[Math.floor(Math.random() * PHRASE_TARGETS.length)];
+                    rulesInput.value = `${chosenKey}->${chosenTarget}`;
+                }
+
+                baselineRules = rulesInput.value;
+                runSimulation();
+            });
+
+            document.getElementById('smart-rules-btn').addEventListener('click', () => {
+                rulesInput.value = editMode === 'letter' ? "A->G" : "A->GAG";
+                baselineRules = rulesInput.value;
+                iterSlider.value = 2;
+                runSimulation();
+            });
+
+            iterSlider.addEventListener('input', runSimulation);
+            axiomInput.addEventListener('input', runSimulation);
+            rulesInput.addEventListener('input', runSimulation);
+
+            const evolutionBtn = document.getElementById('run-evolution-btn');
+            if(evolutionBtn) evolutionBtn.addEventListener('click', runEvolutionarySolver);
+
+            setEditMode('intro');
+        });
+    </script>
+</body>
+</html>
